@@ -93,5 +93,7 @@ pub fn handler_deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
     bank.total_deposits += amount;
     bank.total_deposit_shares += user_shares;
 
+    user.last_updated = Clock::get()?.unix_timestamp;
+
     Ok(())
 }
