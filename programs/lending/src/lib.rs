@@ -26,4 +26,8 @@ pub mod lending {
     pub fn initialize_user(ctx: Context<InitializeUser>, usdc_address: Pubkey) -> Result<()> {
         initialize_user::handler_initialize_user(ctx, usdc_address)
     }
+
+    pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
+        deposit::handler_deposit(ctx, amount)
+    }
 }
