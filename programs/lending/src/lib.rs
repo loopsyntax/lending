@@ -15,7 +15,11 @@ declare_id!("6E3EJE7gcpDnhvmx2qFo5SXDNnAFCwyFew8JoTarNXas");
 pub mod lending {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        initialize::handler(ctx)
+    pub fn initialize_bank(
+        ctx: Context<InitializeBank>,
+        liquidation_threshold: u64,
+        max_ltw: u64,
+    ) -> Result<()> {
+        initialize_bank::handler_initialize_bank(ctx, liquidation_threshold, max_ltw)
     }
 }
