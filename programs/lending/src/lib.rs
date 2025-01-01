@@ -30,4 +30,8 @@ pub mod lending {
     pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
         deposit::handler_deposit(ctx, amount)
     }
+
+    pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
+        withdraw::handler_withdraw(ctx, amount)
+    }
 }
