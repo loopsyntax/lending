@@ -22,4 +22,8 @@ pub mod lending {
     ) -> Result<()> {
         initialize_bank::handler_initialize_bank(ctx, liquidation_threshold, max_ltw)
     }
+
+    pub fn initialize_user(ctx: Context<InitializeUser>, usdc_address: Pubkey) -> Result<()> {
+        initialize_user::handler_initialize_user(ctx, usdc_address)
+    }
 }
