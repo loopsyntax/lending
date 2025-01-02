@@ -34,4 +34,8 @@ pub mod lending {
     pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
         withdraw::handler_withdraw(ctx, amount)
     }
+
+    pub fn borrow(ctx: Context<Borrow>, amount: u64) -> Result<()> {
+        borrow::handler_borrow(ctx, amount)
+    }
 }

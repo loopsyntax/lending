@@ -1,3 +1,5 @@
+use std::f64::consts::E;
+
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
@@ -50,9 +52,10 @@ pub struct Withdraw<'info> {
 }
 
 pub fn handler_withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
-    // This handles the withdrawal of tokens
     let user = &mut ctx.accounts.user_account;
+    let bank = &mut ctx.accounts.bank;
 
+    // Handles token deposits into the bank, calculating and assigning proportional shares to depositor
     let deposited_value: u64;
     if ctx.accounts.mint.to_account_info().key() == user.usdc_address {
         deposited_value = user.deposited_usdc;
@@ -60,10 +63,21 @@ pub fn handler_withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
         deposited_value = user.deposited_sol;
     }
 
-    if amount > deposited_value {
+    let time_difference = user.last_updated - Clock::get()?.unix_timestamp;
+
+    // Validates withdrawal amount against user's deposit value with accrued interest over time
+    bank.total_deposits = (bank.total_deposits as f64
+        * E.powf(bank.interest_rate as f64 * time_difference as f64))
+        as u64;
+
+    let value_per_share = bank.total_deposits as f64 / bank.total_deposit_shares as f64;
+    let user_value = deposited_value as f64 / value_per_share;
+
+    if user_value < amount as f64 {
         return Err(ErrorCode::InsufficientFunds.into());
     }
 
+    // This handles the withdrawal of tokens
     let transfer_cpi_accounts = TransferChecked {
         from: ctx.accounts.bank_token_account.to_account_info(),
         to: ctx.accounts.user_token_account.to_account_info(),
@@ -86,7 +100,6 @@ pub fn handler_withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
     transfer_checked(cpi_context, amount, decimals)?;
 
     // Update the user's state and handles the accounting
-    let bank = &mut ctx.accounts.bank;
     let shares_to_remove =
         (amount as f64 / bank.total_deposits as f64) * bank.total_deposit_shares as f64;
 
