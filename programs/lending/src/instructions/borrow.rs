@@ -3,7 +3,7 @@ use std::f32::consts::E;
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token_interface::{Mint, TokenAccount, TokenInterface},
+    token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked},
 };
 use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2};
 
@@ -72,7 +72,7 @@ pub fn handler_borrow(ctx: Context<Borrow>, amount: u64) -> Result<()> {
                 bank.interest_rate,
                 user.last_updated,
             )?;
-            let total_collateral = sol_price.price as u64 * new_value;
+            total_collateral = sol_price.price as u64 * new_value;
         }
         _ => {
             let usdc_feed_id = get_feed_id_from_hex(USDC_USD_FEED_ID)?;
@@ -83,7 +83,7 @@ pub fn handler_borrow(ctx: Context<Borrow>, amount: u64) -> Result<()> {
                 bank.interest_rate,
                 user.last_updated,
             )?;
-            let total_collateral = usdc_price.price as u64 * new_value;
+            total_collateral = usdc_price.price as u64 * new_value;
         }
     }
 
@@ -93,6 +93,49 @@ pub fn handler_borrow(ctx: Context<Borrow>, amount: u64) -> Result<()> {
 
     if borrowable_amount < amount {
         return Err(ErrorCode::OverBorrowableAmount.into()); // Borrowing amount exceeds collateral
+    }
+
+    let transfer_cpi_accounts = TransferChecked {
+        from: ctx.accounts.bank_token_account.to_account_info(),
+        to: ctx.accounts.user_token_account.to_account_info(),
+        authority: ctx.accounts.bank_token_account.to_account_info(),
+        mint: ctx.accounts.mint.to_account_info(),
+    };
+
+    let cpi_program = ctx.accounts.token_program.to_account_info();
+    let mint_key = ctx.accounts.mint.key();
+    let signer_seeds: &[&[&[u8]]] = &[&[
+        b"treasury",
+        mint_key.as_ref(),
+        &[ctx.bumps.bank_token_account],
+    ]];
+
+    let cpi_context = CpiContext::new_with_signer(cpi_program, transfer_cpi_accounts, signer_seeds);
+    let decimals = ctx.accounts.mint.decimals;
+
+    // Transfer the borrowed tokens to the user's account
+    transfer_checked(cpi_context, amount, decimals)?;
+
+    if bank.total_borrowed == 0 {
+        bank.total_borrowed = amount;
+        bank.total_borrowed_shares = amount;
+    }
+
+    let borrow_ratio = amount.checked_div(bank.total_borrowed).unwrap();
+    let user_shares = bank
+        .total_borrowed_shares
+        .checked_mul(borrow_ratio)
+        .unwrap();
+
+    match ctx.accounts.mint.to_account_info().key() {
+        key if key == user.usdc_address => {
+            user.borrowed_usdc += amount;
+            user.borrowed_usdc_shares += user_shares;
+        }
+        _ => {
+            user.borrowed_sol += amount;
+            user.borrowed_sol_shares += user_shares;
+        }
     }
 
     Ok(())

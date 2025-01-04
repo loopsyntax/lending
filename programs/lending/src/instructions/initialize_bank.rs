@@ -49,6 +49,8 @@ pub fn handler_initialize_bank(
         max_ltw,
         last_updated: 0,
         interest_rate: 0.05 as u64,
+        total_borrowed: 0,
+        total_borrowed_shares: 0,
     });
 
     Ok(())
