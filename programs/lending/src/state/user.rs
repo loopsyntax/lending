@@ -15,4 +15,5 @@ pub struct User {
     pub usdc_address: Pubkey,
     pub health_factor: u64,
     pub last_updated: i64,
+    pub last_updated_borrow: i64,
 }
