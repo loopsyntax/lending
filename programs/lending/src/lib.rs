@@ -38,4 +38,8 @@ pub mod lending {
     pub fn borrow(ctx: Context<Borrow>, amount: u64) -> Result<()> {
         borrow::handler_borrow(ctx, amount)
     }
+
+    pub fn repay(ctx: Context<Repay>, amount: u64) -> Result<()> {
+        repay::handler_repay(ctx, amount)
+    }
 }
