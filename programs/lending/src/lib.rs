@@ -42,4 +42,8 @@ pub mod lending {
     pub fn repay(ctx: Context<Repay>, amount: u64) -> Result<()> {
         repay::handler_repay(ctx, amount)
     }
+
+    pub fn liquidate(ctx: Context<Liquidate>) -> Result<()> {
+        liquidate::handler_liquidate(ctx)
+    }
 }
