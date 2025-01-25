@@ -49,7 +49,7 @@ pub struct Liquidate<'info> {
     #[account(
         mut,
         seeds = [liquidator.key().as_ref()],
-        bump,
+        bump = user_account.bump
     )]
     pub user_account: Account<'info, User>,
 

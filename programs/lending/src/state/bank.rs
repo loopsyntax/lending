@@ -15,4 +15,6 @@ pub struct Bank {
     pub max_ltw: u64,
     pub last_updated: i64,
     pub interest_rate: u64,
+    pub bank_bump: u8,
+    pub treasury_bump: u8,
 }

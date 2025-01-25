@@ -34,6 +34,7 @@ pub fn handler_initialize_user(ctx: Context<InitializeUser>, usdc_address: Pubke
         health_factor: 0,
         last_updated: 0,
         last_updated_borrow: 0,
+        bump: ctx.bumps.user_account, // Store the bump for future PDA validation
     });
     Ok(())
 }

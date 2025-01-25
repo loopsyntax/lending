@@ -16,21 +16,21 @@ pub struct Deposit<'info> {
     #[account(
         mut,
         seeds = [mint.key().as_ref()],
-        bump,
+        bump = bank.bank_bump
     )]
     pub bank: Account<'info, Bank>,
 
     #[account(
         mut,
         seeds = [b"treasury", mint.key().as_ref()],
-        bump,
+        bump = bank.treasury_bump
     )]
     pub bank_token_account: InterfaceAccount<'info, TokenAccount>,
 
     #[account(
         mut,
         seeds = [signer.key().as_ref()],
-        bump,
+        bump = user_account.bump
     )]
     pub user_account: Account<'info, User>,
 

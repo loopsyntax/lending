@@ -51,6 +51,8 @@ pub fn handler_initialize_bank(
         interest_rate: 0.05 as u64,
         total_borrowed: 0,
         total_borrowed_shares: 0,
+        bank_bump: ctx.bumps.bank,
+        treasury_bump: ctx.bumps.bank_token_account,
     });
 
     Ok(())
