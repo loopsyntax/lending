@@ -77,10 +77,6 @@ pub fn handler_withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
         return Err(ErrorCode::InsufficientFunds.into());
     }
 
-    // if amount > deposited_value {
-    //     return Err(ErrorCode::InsufficientFunds.into());
-    // }
-
     // This handles the withdrawal of tokens
     let transfer_cpi_accounts = TransferChecked {
         from: ctx.accounts.bank_token_account.to_account_info(),
