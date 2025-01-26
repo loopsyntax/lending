@@ -19,21 +19,21 @@ pub struct Borrow<'info> {
     #[account(
         mut,
         seeds = [mint.key().as_ref()],
-        bump,
+        bump = bank.bank_bump
     )]
     pub bank: Account<'info, Bank>,
 
     #[account(
         mut,
         seeds = [b"treasury", mint.key().as_ref()],
-        bump,
+        bump = bank.treasury_bump
     )]
     pub bank_token_account: InterfaceAccount<'info, TokenAccount>,
 
     #[account(
         mut,
         seeds = [signer.key().as_ref()],
-        bump,
+        bump = user_account.bump
     )]
     pub user_account: Account<'info, User>,
 
@@ -62,6 +62,7 @@ pub fn handler_borrow(ctx: Context<Borrow>, amount: u64) -> Result<()> {
 
     let total_collateral: u64;
 
+    // To check what asset the user needs for collateral
     match ctx.accounts.mint.to_account_info().key() {
         key if key == user.usdc_address => {
             let sol_feed_id = get_feed_id_from_hex(SOL_USD_FEED_ID)?;
@@ -104,11 +105,7 @@ pub fn handler_borrow(ctx: Context<Borrow>, amount: u64) -> Result<()> {
 
     let cpi_program = ctx.accounts.token_program.to_account_info();
     let mint_key = ctx.accounts.mint.key();
-    let signer_seeds: &[&[&[u8]]] = &[&[
-        b"treasury",
-        mint_key.as_ref(),
-        &[ctx.bumps.bank_token_account],
-    ]];
+    let signer_seeds: &[&[&[u8]]] = &[&[b"treasury", mint_key.as_ref(), &[bank.treasury_bump]]];
 
     let cpi_context = CpiContext::new_with_signer(cpi_program, transfer_cpi_accounts, signer_seeds);
     let decimals = ctx.accounts.mint.decimals;
