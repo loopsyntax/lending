@@ -18,21 +18,21 @@ pub struct Repay<'info> {
     #[account(
         mut,
         seeds = [mint.key().as_ref()],
-        bump,
+        bump = bank.bank_bump,
     )]
     pub bank: Account<'info, Bank>,
 
     #[account(
         mut,
         seeds = [b"treasury", mint.key().as_ref()],
-        bump,
+        bump = bank.treasury_bump
     )]
     pub bank_token_account: InterfaceAccount<'info, TokenAccount>,
 
     #[account(
         mut,
         seeds = [signer.key().as_ref()],
-        bump,
+        bump = user_account.bump
     )]
     pub user_account: Account<'info, User>,
 
@@ -65,7 +65,7 @@ pub fn handler_repay(ctx: Context<Repay>, amount: u64) -> Result<()> {
         }
     }
 
-    let time_difference = user.last_updated_borrow - Clock::get()?.unix_timestamp;
+    let time_difference = user.last_updated_borrowed - Clock::get()?.unix_timestamp;
 
     bank.total_borrowed -= (bank.total_borrowed as f64
         * E.powf(bank.interest_rate as f32 * time_difference as f32) as f64)

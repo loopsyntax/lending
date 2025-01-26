@@ -21,28 +21,28 @@ pub struct Liquidate<'info> {
     #[account(
         mut,
         seeds = [collateral_mint.key().as_ref()],
-        bump,
+        bump = collateral_bank.bank_bump
     )]
     pub collateral_bank: Account<'info, Bank>,
 
     #[account(
         mut,
         seeds = [borrowed_mint.key().as_ref()],
-        bump,
+        bump = borrowed_bank.bank_bump
     )]
     pub borrowed_bank: Account<'info, Bank>,
 
     #[account(
         mut,
         seeds = [b"treasury", collateral_mint.key().as_ref()],
-        bump,
+        bump = collateral_bank.treasury_bump
     )]
     pub collateral_bank_token_account: InterfaceAccount<'info, TokenAccount>,
 
     #[account(
         mut,
         seeds = [b"treasury", borrowed_mint.key().as_ref()],
-        bump,
+        bump = borrowed_bank.treasury_bump
     )]
     pub borrowed_bank_token_account: InterfaceAccount<'info, TokenAccount>,
 
@@ -109,7 +109,7 @@ pub fn handler_liquidate(ctx: Context<Liquidate>) -> Result<()> {
             let new_sol = calculate_accrued_interest(
                 user.borrowed_sol,
                 borrowed_bank.interest_rate,
-                user.last_updated_borrow,
+                user.last_updated_borrowed,
             )?;
             total_borrowed = sol_price.price as u64 * new_sol;
         }
@@ -123,7 +123,7 @@ pub fn handler_liquidate(ctx: Context<Liquidate>) -> Result<()> {
             let new_usdc = calculate_accrued_interest(
                 user.borrowed_usdc,
                 borrowed_bank.interest_rate,
-                user.last_updated_borrow,
+                user.last_updated_borrowed,
             )?;
             total_borrowed = usdc_price.price as u64 * new_usdc;
         }
@@ -176,7 +176,7 @@ pub fn handler_liquidate(ctx: Context<Liquidate>) -> Result<()> {
     let signer_seeds: &[&[&[u8]]] = &[&[
         b"treasury",
         mint_key.as_ref(),
-        &[ctx.bumps.collateral_bank_token_account],
+        &[collateral_bank.treasury_bump],
     ]];
 
     let cpi_context_to_liquidator =

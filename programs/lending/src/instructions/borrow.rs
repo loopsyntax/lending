@@ -96,6 +96,7 @@ pub fn handler_borrow(ctx: Context<Borrow>, amount: u64) -> Result<()> {
         return Err(ErrorCode::OverBorrowableAmount.into()); // Borrowing amount exceeds collateral
     }
 
+    // Make transfer to the user
     let transfer_cpi_accounts = TransferChecked {
         from: ctx.accounts.bank_token_account.to_account_info(),
         to: ctx.accounts.user_token_account.to_account_info(),
@@ -113,6 +114,7 @@ pub fn handler_borrow(ctx: Context<Borrow>, amount: u64) -> Result<()> {
     // Transfer the borrowed tokens to the user's account
     transfer_checked(cpi_context, amount, decimals)?;
 
+    // Update the state of the user and bank
     if bank.total_borrowed == 0 {
         bank.total_borrowed = amount;
         bank.total_borrowed_shares = amount;
@@ -135,7 +137,7 @@ pub fn handler_borrow(ctx: Context<Borrow>, amount: u64) -> Result<()> {
         }
     }
 
-    user.last_updated_borrow = Clock::get()?.unix_timestamp;
+    user.last_updated_borrowed = Clock::get()?.unix_timestamp;
 
     Ok(())
 }
