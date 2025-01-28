@@ -14,44 +14,44 @@ pub struct Liquidate<'info> {
     #[account(mut)]
     pub liquidator: Signer<'info>,
 
-    pub price_update: Account<'info, PriceUpdateV2>,
-    pub collateral_mint: InterfaceAccount<'info, Mint>,
-    pub borrowed_mint: InterfaceAccount<'info, Mint>,
+    pub price_update: Box<Account<'info, PriceUpdateV2>>,
+    pub collateral_mint: Box<InterfaceAccount<'info, Mint>>,
+    pub borrowed_mint: Box<InterfaceAccount<'info, Mint>>,
 
     #[account(
         mut,
         seeds = [collateral_mint.key().as_ref()],
         bump = collateral_bank.bank_bump
     )]
-    pub collateral_bank: Account<'info, Bank>,
+    pub collateral_bank: Box<Account<'info, Bank>>,
 
     #[account(
         mut,
         seeds = [borrowed_mint.key().as_ref()],
         bump = borrowed_bank.bank_bump
     )]
-    pub borrowed_bank: Account<'info, Bank>,
+    pub borrowed_bank: Box<Account<'info, Bank>>,
 
     #[account(
         mut,
         seeds = [b"treasury", collateral_mint.key().as_ref()],
         bump = collateral_bank.treasury_bump
     )]
-    pub collateral_bank_token_account: InterfaceAccount<'info, TokenAccount>,
+    pub collateral_bank_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
     #[account(
         mut,
         seeds = [b"treasury", borrowed_mint.key().as_ref()],
         bump = borrowed_bank.treasury_bump
     )]
-    pub borrowed_bank_token_account: InterfaceAccount<'info, TokenAccount>,
+    pub borrowed_bank_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
     #[account(
         mut,
         seeds = [liquidator.key().as_ref()],
         bump = user_account.bump
     )]
-    pub user_account: Account<'info, User>,
+    pub user_account: Box<Account<'info, User>>,
 
     #[account(
        init_if_needed,
@@ -60,7 +60,7 @@ pub struct Liquidate<'info> {
        associated_token::authority = liquidator,
        associated_token::token_program = token_program,
     )]
-    pub liquidator_collateral_token_account: InterfaceAccount<'info, TokenAccount>,
+    pub liquidator_collateral_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
     #[account(
        init_if_needed,
@@ -69,7 +69,7 @@ pub struct Liquidate<'info> {
        associated_token::authority = liquidator,
        associated_token::token_program = token_program,
     )]
-    pub liquidator_borrowed_token_account: InterfaceAccount<'info, TokenAccount>,
+    pub liquidator_borrowed_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
     pub token_program: Interface<'info, TokenInterface>,
     pub associated_token_program: Program<'info, AssociatedToken>,

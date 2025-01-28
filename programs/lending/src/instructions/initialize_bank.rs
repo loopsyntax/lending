@@ -17,7 +17,7 @@ pub struct InitializeBank<'info> {
         seeds = [mint.key().as_ref()],
         bump,
     )]
-    pub bank: Account<'info, Bank>,
+    pub bank: Box<Account<'info, Bank>>,
 
     #[account(
         init,
@@ -27,7 +27,7 @@ pub struct InitializeBank<'info> {
         seeds = [b"treasury", mint.key().as_ref()],
         bump,
     )]
-    pub bank_token_account: InterfaceAccount<'info, TokenAccount>,
+    pub bank_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
     pub token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
