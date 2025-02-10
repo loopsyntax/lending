@@ -10,4 +10,10 @@ pub enum ErrorCode {
     OverRepay,
     #[msg("User is not under collaterized, can't be liquidated")]
     NotUnderCollaterized,
+    #[msg("No outstanding borrows")]
+    NoOutstandingBorrows,
+    #[msg("Math Overflow")]
+    MathOverflow,
+    #[msg("No deposits")]
+    NoDeposits,
 }
